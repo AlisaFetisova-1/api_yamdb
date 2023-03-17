@@ -1,26 +1,38 @@
+from django.core.validators import RegexValidator
 from django.db import models
 
 TEXT_LENGTH = 15
 
 class Category(models.Model):
-    name = models.CharField(max_length=200)
-    slug = models.SlugField(unique=True)
+    name = models.CharField(max_length=256)
+    slug = models.SlugField(
+        unique=True,
+        validators=[RegexValidator(
+            regex=r'^[-a-zA-Z0-9_]+$',
+        )]
+    )
 
     def __str__(self):
         return self.name[:TEXT_LENGTH]
 
 
 class Genre(models.Model):
-    name = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True)
+    name = models.CharField(max_length=256)
+    slug = models.SlugField(
+        unique=True,
+        validators=[RegexValidator(
+            regex=r'^[-a-zA-Z0-9_]+$',
+        )]
+    )
 
     def __str__(self):
         return self.name[:TEXT_LENGTH]
 
 
 class Title(models.Model):
-    name = models.CharField(max_length=200)
-    description = models.TextField()
+    name = models.CharField(max_length=256)
+    year = models.IntegerField()
+    description = models.TextField(blank=True)
     genre = models.ManyToManyField(Genre, through='GenreTitle')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
 
