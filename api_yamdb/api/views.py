@@ -1,5 +1,4 @@
-
-from rest_framework import  viewsets
+from rest_framework import viewsets
 from django.contrib.auth import get_user_model
 
 from rest_framework.generics import get_object_or_404
@@ -7,11 +6,11 @@ from rest_framework.generics import get_object_or_404
 from reviews.models import Comment, Review, Title
 
 from .paginators import FourPerPagePagination
-from .permissions import (AdminOrSuperuser, IsAdminOrReadOnly,
-                          IsUserAnonModerAdmin)
+from .permissions import (IsUserAnonModerAdmin)
 from .serializers import (CommentSerializer, ReviewSerializer)
 
 User = get_user_model()
+
 
 class ReViewSet(viewsets.ModelViewSet):
     permission_classes = [IsUserAnonModerAdmin]

@@ -5,9 +5,10 @@ from django.db import models
 
 User = get_user_model()
 
+
 class Review(models.Model):
     title = models.ForeignKey(
-         on_delete=models.CASCADE,
+        on_delete=models.CASCADE,
         related_name='reviews')
     text = models.TextField()
     author = models.ForeignKey(
