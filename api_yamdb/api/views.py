@@ -1,13 +1,13 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, DjangoFilterBackend, filters, mixins
 from django.contrib.auth import get_user_model
 
 from rest_framework.generics import get_object_or_404
 
-from reviews.models import Comment, Review, Title
+from reviews.models import Comment, Review, Title, Category, Genre
 
 from .paginators import FourPerPagePagination
-from .permissions import (IsUserAnonModerAdmin)
-from .serializers import (CommentSerializer, ReviewSerializer)
+from .permissions import (IsUserAnonModerAdmin, IsAuthor)
+from .serializers import (CommentSerializer, ReviewSerializer, CategorySerial, GenreSerial, TitleSerial)
 
 User = get_user_model()
 
@@ -48,3 +48,47 @@ class CommentViewSet(viewsets.ModelViewSet):
         review = self._get_review()
         author = self.request.user
         serializer.save(author=author, review=review)
+
+
+
+class ListCreateDestroyViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
+):
+    pass
+
+
+class ListCreateDestroyViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
+):
+    pass
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerial
+    permission_classes = [IsAuthor]
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('category__slug', 'genre__slug', 'name', 'year')
+
+
+class CategoryViewSet(ListCreateDestroyViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerial
+    permission_classes = [IsAuthor]
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+
+
+class GenreViewSet(ListCreateDestroyViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerial
+    permission_classes = [IsAuthor]
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)

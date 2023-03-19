@@ -1,4 +1,4 @@
-from rest_framework import permissions, status
+from rest_framework import permissions
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):
@@ -39,3 +39,18 @@ class IsUserAnonModerAdmin(permissions.BasePermission):
             )
             return safe or admin_or_author
         return safe
+
+
+class IsAuthor(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        return (
+            request.method in permissions.SAFE_METHODS
+            or request.user.is_authenticated
+        )
+
+    def has_object_permission(self, request, view, obj):
+        return (
+            request.method in permissions.SAFE_METHODS
+            or obj.author == request.user
+        )

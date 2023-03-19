@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
-from reviews.models import Comment, Review, Title
+from reviews.models import Comment, Review, Title, Category, Genre
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -30,3 +30,24 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ("id", "text", "author", "pub_date")
         model = Comment
+
+
+class CategorySerial(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('name',)
+        model = Category
+
+
+class GenreSerial(serializers.ModelSerializer):
+
+    class Meta:
+        fields = '__all__'
+        model = Genre
+
+
+class TitleSerial(serializers.ModelSerializer):
+
+    class Meta:
+        fields = '__all__'
+        model = Title
