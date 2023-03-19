@@ -1,6 +1,6 @@
+from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
-from django.contrib.auth.models import AbstractUser
 
 TEXT_LENGTH = 15
 
@@ -96,8 +96,13 @@ class Title(models.Model):
     name = models.CharField(max_length=256)
     year = models.IntegerField()
     description = models.TextField(blank=True)
-    genre = models.ManyToManyField(Genre, through='GenreTitle')
-    Category = models.ForeignKey('Category', on_delete=models.CASCADE, null=True)
+    genre = models.ManyToManyField(
+        Genre,
+        through='GenreTitle')
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        null=True)
 
     class Meta:
         default_related_name = 'titles'
