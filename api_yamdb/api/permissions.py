@@ -29,10 +29,7 @@ class IsUserAnonModerAdmin(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         if request.method == "DELETE":
-            if request.user == obj.author:
-                return (True, status.HTTP_403_FORBIDDEN)
-            if request.user._is_moderator:
-                return (True, status.HTTP_204_NO_CONTENT)
+            return (request.user == obj.author)
 
         safe = request.method in permissions.SAFE_METHODS
         if request.user.is_authenticated:
