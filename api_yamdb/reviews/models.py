@@ -97,24 +97,43 @@ class Title(models.Model):
     year = models.IntegerField()
     description = models.TextField(blank=True)
     genre = models.ManyToManyField(Genre, through='GenreTitle')
-    categorie = models.ForeignKey('Categorie', on_delete=models.CASCADE, null=True)
+    Category = models.ForeignKey('Category', on_delete=models.CASCADE, null=True)
 
     class Meta:
         default_related_name = 'titles'
 
     def __str__(self):
         return self.name[:TEXT_LENGTH]
-
-
-class GenreTitle(models.Model):
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
     
 
+class GenreTitle(models.Model):
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        related_name='titles')
+    genre = models.ForeignKey(
+        Genre,
+        on_delete=models.CASCADE,
+        related_name='genre')
+
+    class Meta:
+        ordering = ['id']
+        verbose_name_plural = 'Связь названий с жанрами'
+        verbose_name = 'Связь названий с жанрами'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'genre'],
+                name='genre_titles'
+            )
+        ]
     def __str__(self):
         return f'произведение {self.title} имеет жанр: {self.genre}'
 
 
 class Review(models.Model):
+    title = models.ForeignKey(
+        Title, on_delete=models.CASCADE,
+        related_name='reviews')
     text = models.TextField()
     author = models.ForeignKey(
         User, on_delete=models.CASCADE)
@@ -142,7 +161,7 @@ class Review(models.Model):
         verbose_name = 'Отзыв'
         constraints = [
             models.UniqueConstraint(fields=['title', 'author'],
-                                    name='unique_field')
+                                   name='unique_field')
         ]
 
     def __str__(self):

@@ -3,7 +3,6 @@ from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from rest_framework import (status, viewsets,
-                            DjangoFilterBackend,
                             filters, mixins)
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -11,7 +10,6 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.generics import get_object_or_404
-
 
 from reviews.models import User, Comment, Review, Title, Category, Genre
 from .permissions import (AdminOrSuperuser, IsUserAnonModerAdmin, IsAuthor)
@@ -119,7 +117,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerial
     permission_classes = [IsAuthor]
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = ()
     filterset_fields = ('category__slug', 'genre__slug', 'name', 'year')
 
 
