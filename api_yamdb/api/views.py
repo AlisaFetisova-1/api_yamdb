@@ -8,10 +8,11 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import AccessToken
 
-
 from reviews.models import User
 from .permissions import AdminOrSuperuser
-from .serializers import GetTokenSerializer, MeSerializer, SignUpSerializer, UserSerializer
+from .serializers import (
+    GetTokenSerializer, MeSerializer,
+    UserSerializer, SignUpSerializer)
 
 
 class UserViewSet(ModelViewSet):
@@ -76,9 +77,16 @@ def get_jwt_token(request):
         User,
         username=serializer.validated_data['username']
     )
-    if default_token_generator.check_token(
+    # if default_token_generator.check_token(
+    #     user, serializer.validated_data['confirmation_code']
+    # ):
+    #     token = AccessToken.for_user(user)
+    #     return Response({'JWT token': str(token)}, status=status.HTTP_200_OK)
+    # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    if not default_token_generator.check_token(
         user, serializer.validated_data['confirmation_code']
     ):
-        token = AccessToken.for_user(user)
-        return Response({'JWT token': str(token)}, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    token = AccessToken.for_user(user)
+    return Response({'JWT token': str(token)}, status=status.HTTP_200_OK)

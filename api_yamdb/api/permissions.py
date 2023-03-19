@@ -6,3 +6,8 @@ class AdminOrSuperuser(permissions.BasePermission):
         if request.user.is_authenticated:
             return request.user._is_admin
         return False
+
+class ReadOnly(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        return request.method in permissions.SAFE_METHODS
