@@ -108,16 +108,13 @@ class Title(models.Model):
 
 class GenreTitle(models.Model):
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
-    title = models.ForeignKey(Title, on_delete=models.CASCADE)
+    
 
     def __str__(self):
         return f'произведение {self.title} имеет жанр: {self.genre}'
 
 
 class Review(models.Model):
-    title = models.ForeignKey(
-        on_delete=models.CASCADE,
-        related_name='reviews')
     text = models.TextField()
     author = models.ForeignKey(
         User, on_delete=models.CASCADE)
