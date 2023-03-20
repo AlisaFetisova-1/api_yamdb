@@ -170,7 +170,7 @@ class Review(models.Model):
     )
 
     class Meta:
-        ordering = ('id')
+        ordering = ('id',)
         verbose_name_plural = 'Отзывы'
         verbose_name = 'Отзыв'
         constraints = [
@@ -196,7 +196,7 @@ class Comment(models.Model):
     )
 
     class Meta:
-        ordering = ('id')
+        ordering = ('id',)
         default_related_name = 'comments'
         verbose_name = 'Коментарий к отзыву'
 
