@@ -1,22 +1,41 @@
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
-from reviews.models import Comment, Review, Title, Category, Genre, User
+from rest_framework.serializers import CharField, EmailField, ValidationError
+from rest_framework.validators import UniqueValidator
+from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    username = CharField(validators=[UniqueValidator(
+        queryset=User.objects.all())],
+        required=True,
+    )
+    email = EmailField(validators=[UniqueValidator(
+        queryset=User.objects.all())],
+        required=True,
+    )
+
     class Meta:
         model = User
         fields = (
             'username', 'email', 'first_name',
             'last_name', 'bio', 'role')
-        
+
     def validate_username(self, username):
         if username == 'me':
-            raise serializers.ValidationError('Вы не можете использовать "me"!')
+            raise ValidationError(
+                'Вы не можете использовать "me"!')
         return username
 
 
 class MeSerializer(serializers.ModelSerializer):
+    username = CharField(
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+    email = EmailField(
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+
     class Meta:
         model = User
         fields = (
@@ -24,12 +43,16 @@ class MeSerializer(serializers.ModelSerializer):
             'last_name', 'bio', 'role')
         read_only_fields = ('role',)
 
+    def validate_username(self, username):
+        if username == 'me':
+            raise ValidationError(
+                'Вы не можете использовать "me"!')
+        return username
+
 
 class GetTokenSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(
-        required=True)
-    confirmation_code = serializers.CharField(
-        required=True)
+    username = CharField(required=True)
+    confirmation_code = CharField(required=True)
 
     class Meta:
         model = User
@@ -46,24 +69,34 @@ class SignUpSerializer(serializers.ModelSerializer):
         fields = ('email', 'username')
 
 
-class CategorySerial(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ('name',)
         model = Category
+        exclude = ('id',)
 
 
-class GenreSerial(serializers.ModelSerializer):
+class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = '__all__'
         model = Genre
+        exclude = ('id',)
 
 
-class TitleSerial(serializers.ModelSerializer):
+class TitleSerializer(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Genre.objects.all(),
+        many=True
+    )
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all()
+    )
 
     class Meta:
-        fields = '__all__'
+        fields = (
+            'name', 'year', 'description', 'genre', 'category')
         model = Title
 
 
@@ -83,7 +116,7 @@ class ReviewSerializer(serializers.ModelSerializer):
                 author=request.user, title=title
             ).exists():
                 raise serializers.ValidationError(
-                    'Вы уже оставли свой ответ'
+                    'Вы уже оставили свой ответ'
                 )
         return obj
 
@@ -94,4 +127,3 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ("id", "text", "author", "pub_date")
         model = Comment
-

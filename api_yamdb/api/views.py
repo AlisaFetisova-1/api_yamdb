@@ -1,24 +1,30 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from django.contrib.auth import get_user_model
-from rest_framework import (status, viewsets,
-                            filters, mixins)
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework.generics import get_object_or_404
+from reviews.models import Category, Comment, Genre, Review, Title, User
 
-from reviews.models import User, Comment, Review, Title, Category, Genre
-from .permissions import (AdminOrSuperuser, IsUserAnonModerAdmin, IsAuthor)
-from .serializers import (GetTokenSerializer, MeSerializer,
-                          SignUpSerializer, UserSerializer,
-                          CommentSerializer,ReviewSerializer,
-                          CategorySerial, GenreSerial, TitleSerial)
 from .paginators import FourPerPagePagination
-
+from .permissions import AdminOrSuperuser, IsAuthor, IsUserAnonModerAdmin
+from .serializers import (
+    CategorySerializer,
+    CommentSerializer,
+    GenreSerializer,
+    GetTokenSerializer,
+    MeSerializer,
+    ReviewSerializer,
+    SignUpSerializer,
+    TitleSerializer,
+    UserSerializer
+)
 
 User = get_user_model()
 
@@ -85,27 +91,16 @@ def get_jwt_token(request):
         User,
         username=serializer.validated_data['username']
     )
-    if default_token_generator.check_token(
+    if not default_token_generator.check_token(
         user, serializer.validated_data['confirmation_code']
     ):
-        token = AccessToken.for_user(user)
-        return Response({'JWT token': str(token)}, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-class ListCreateDestroyViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet
-):
-    pass
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    token = AccessToken.for_user(user)
+    return Response({'JWT token': str(token)}, status=status.HTTP_200_OK)
 
 
 class ListCreateDestroyViewSet(
     mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
     mixins.CreateModelMixin,
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
@@ -115,15 +110,15 @@ class ListCreateDestroyViewSet(
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    serializer_class = TitleSerial
+    serializer_class = TitleSerializer
     permission_classes = [IsAuthor]
-    filter_backends = ()
+    filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('category__slug', 'genre__slug', 'name', 'year')
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
-    serializer_class = CategorySerial
+    serializer_class = CategorySerializer
     permission_classes = [IsAuthor]
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
@@ -131,7 +126,7 @@ class CategoryViewSet(ListCreateDestroyViewSet):
 
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
-    serializer_class = GenreSerial
+    serializer_class = GenreSerializer
     permission_classes = [IsAuthor]
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
