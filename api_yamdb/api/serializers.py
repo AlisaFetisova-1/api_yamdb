@@ -6,36 +6,16 @@ from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    username = CharField(validators=[UniqueValidator(
-        queryset=User.objects.all())],
-        required=True,
-    )
-    email = EmailField(validators=[UniqueValidator(
-        queryset=User.objects.all())],
-        required=True,
-    )
-
+    
     class Meta:
         model = User
         fields = (
             'username', 'email', 'first_name',
             'last_name', 'bio', 'role')
 
-    def validate_username(self, username):
-        if username == 'me':
-            raise ValidationError(
-                'Вы не можете использовать "me"!')
-        return username
-
 
 class MeSerializer(serializers.ModelSerializer):
-    username = CharField(
-        validators=[UniqueValidator(queryset=User.objects.all())]
-    )
-    email = EmailField(
-        validators=[UniqueValidator(queryset=User.objects.all())]
-    )
-
+    
     class Meta:
         model = User
         fields = (
