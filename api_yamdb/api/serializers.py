@@ -75,12 +75,22 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         exclude = ('id',)
 
+    def validate_data(self, data):
+        if not data.is_valid():
+            raise serializers.ValidationError()
+        return data
+
 
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
         exclude = ('id',)
+
+    def validate_data(self, data):
+        if not data.is_valid():
+            raise serializers.ValidationError()
+        return data
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -96,7 +106,7 @@ class TitleSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = (
-            'name', 'year', 'description', 'genre', 'category')
+            'id', 'name', 'year', 'description', 'genre', 'category')
         model = Title
 
 
