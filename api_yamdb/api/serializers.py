@@ -76,7 +76,7 @@ class CategorySerializer(serializers.ModelSerializer):
         exclude = ('id',)
 
     def validate_data(self, data):
-        if not data.is_valid():
+        if len(data['slug']) > 50:
             raise serializers.ValidationError()
         return data
 
