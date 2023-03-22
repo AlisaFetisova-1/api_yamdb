@@ -23,11 +23,11 @@ class MeSerializer(serializers.ModelSerializer):
             'last_name', 'bio', 'role')
         read_only_fields = ('role',)
 
-    def validate_username(self, username):
-        if username == 'me':
-            raise ValidationError(
-                'Вы не можете использовать "me"!')
-        return username
+    # def validate_username(self, username):
+    #     if username == 'me':
+    #         raise ValidationError(
+    #             'Вы не можете использовать "me"!')
+    #     return username
 
 
 class GetTokenSerializer(serializers.ModelSerializer):

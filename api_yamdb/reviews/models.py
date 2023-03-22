@@ -4,6 +4,8 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 
+from .validators import validate_username
+
 TEXT_LENGTH = 15
 
 USER = 'user'
@@ -19,6 +21,7 @@ ROLE_CHOICES = [
 
 class User(AbstractUser):
     username = models.CharField(
+        validators=(validate_username,),
         max_length=150,
         unique=True,
         blank=False,
