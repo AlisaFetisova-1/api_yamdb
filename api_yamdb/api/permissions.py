@@ -6,16 +6,15 @@ class IsAdminOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         safe = request.method in permissions.SAFE_METHODS
         if request.user.is_authenticated:
-            return safe or request.user.is_staff
+            return safe or request.user.is_admin
         return safe
 
 
 class AdminOrSuperuser(permissions.BasePermission):
     def has_permission(self, request, view):
-        return (request.user.is_authenticated
-                and request.user.is_superuser
-                or request.user.is_staff
-        )
+        if request.user.is_authenticated:
+            return request.user.is_admin
+        return False
 
 
 class AdminOrAnon(permissions.BasePermission):
@@ -40,7 +39,7 @@ class IsUserAnonModerAdmin(permissions.BasePermission):
         safe = request.method in permissions.SAFE_METHODS
         if request.user.is_authenticated:
             admin_or_author = (
-                request.user.is_staff
+                request.user.is_admin
                 or request.user == obj.author
             )
             return safe or admin_or_author

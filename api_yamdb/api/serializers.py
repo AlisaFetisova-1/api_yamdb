@@ -6,26 +6,12 @@ from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    username = CharField(validators=[UniqueValidator(
-        queryset=User.objects.all())],
-        required=True,
-    )
-    email = EmailField(validators=[UniqueValidator(
-        queryset=User.objects.all())],
-        required=True,
-    )
 
     class Meta:
         model = User
         fields = (
             'username', 'email', 'first_name',
             'last_name', 'bio', 'role')
-
-    def validate_username(self, username):
-        if username == 'me':
-            raise ValidationError(
-                'Вы не можете использовать "me"!')
-        return username
 
 
 class MeSerializer(serializers.ModelSerializer):
@@ -111,10 +97,14 @@ class TitleSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    author = serializers.StringRelatedField()
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True,
+        default=serializers.CurrentUserDefault(),
+        )
 
     class Meta:
-        fields = ("id", "text", "author", "score", "pub_date")
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
         model = Review
 
     def validate(self, obj):
@@ -132,8 +122,11 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.StringRelatedField()
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True,
+    )
 
     class Meta:
-        fields = ("id", "text", "author", "pub_date")
+        fields = ('id', 'text', 'author', 'pub_date')
         model = Comment

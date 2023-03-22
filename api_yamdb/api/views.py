@@ -34,6 +34,7 @@ class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (AdminOrSuperuser, )
+    pagination_class = FourPerPagePagination
 
     @action(
         methods=['get', 'patch'],
