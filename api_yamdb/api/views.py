@@ -13,12 +13,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 from .paginators import FourPerPagePagination
-from .permissions import (
-    AdminOrSuperuser,
-    AdminOrSuperuserOrReadonly,
-    IsUserAnonModerAdmin,
-    ReadOnly
-)
+from .permissions import AdminOrAnon, AdminOrSuperuser, IsUserAnonModerAdmin
 from .serializers import (
     CategorySerializer,
     CommentSerializer,
@@ -116,7 +111,8 @@ class ListCreateDestroyViewSet(
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    permission_classes = (AdminOrSuperuserOrReadonly,)
+    pagination_class = FourPerPagePagination
+    permission_classes = (AdminOrAnon,)
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('category__slug', 'genre__slug', 'name', 'year')
 
@@ -125,9 +121,7 @@ class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     pagination_class = FourPerPagePagination
-    # permission_classes = (ReadOnly | AdminOrSuperuser,)
-    permission_classes = (IsAuthenticatedOrReadOnly | AdminOrSuperuser,)
-    # permission_classes = (AdminOrSuperuserOrReadonly,)
+    permission_classes = (AdminOrAnon,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
 
@@ -136,8 +130,7 @@ class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     pagination_class = FourPerPagePagination
-    # permission_classes = (AdminOrSuperuserOrReadonly,)
-    permission_classes = (IsAuthenticatedOrReadOnly | AdminOrSuperuser,)
+    permission_classes = (AdminOrAnon,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
 
