@@ -1,5 +1,5 @@
 from rest_framework import permissions
-
+from django.contrib import admin
 
 class IsAdminOrReadOnly(permissions.BasePermission):
 
@@ -33,14 +33,14 @@ class IsUserAnonModerAdmin(permissions.BasePermission):
                 or request.user.is_authenticated)
 
     def has_object_permission(self, request, view, obj):
-        if request.method == "DELETE":
-            return (request.user == obj.author)
-
-        safe = request.method in permissions.SAFE_METHODS
-        if request.user.is_authenticated:
-            admin_or_author = (
-                request.user.is_admin
-                or request.user == obj.author
-            )
-            return safe or admin_or_author
-        return safe
+        return (
+            request.method in permissions.SAFE_METHODS
+            or request.user.is_admin
+            or request.user.is_moderator
+            or obj.author == request.user
+        )
+    @property
+    def is_admin(self):
+        return (
+            self.role == admin or self.is_superuser or self.is_staff
+        )
