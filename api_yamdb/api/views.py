@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
@@ -22,6 +23,7 @@ from .serializers import (
     MeSerializer,
     ReviewSerializer,
     SignUpSerializer,
+    TitleGETSerializer,
     TitleSerializer,
     UserSerializer
 )
@@ -110,12 +112,17 @@ class ListCreateDestroyViewSet(
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     serializer_class = TitleSerializer
     pagination_class = FourPerPagePagination
     permission_classes = (AdminOrAnon,)
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('category__slug', 'genre__slug', 'name', 'year')
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return TitleGETSerializer
+        return TitleSerializer
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
