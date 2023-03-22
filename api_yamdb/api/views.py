@@ -13,6 +13,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
+from .filters import TitleFilter
 from .paginators import FourPerPagePagination
 from .permissions import AdminOrAnon, AdminOrSuperuser, IsUserAnonModerAdmin
 from .serializers import (
@@ -117,7 +118,8 @@ class TitleViewSet(viewsets.ModelViewSet):
     pagination_class = FourPerPagePagination
     permission_classes = (AdminOrAnon,)
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('category__slug', 'genre__slug', 'name', 'year')
+    # filterset_fields = ('category__slug', 'genre__slug', 'name', 'year')
+    filterset_class = TitleFilter
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
