@@ -7,7 +7,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import AccessToken
@@ -15,7 +15,7 @@ from reviews.models import Category, Comment, Genre, Review, Title, User
 
 from .filters import TitleFilter
 from .paginators import FourPerPagePagination
-from .permissions import AdminOrAnon, AdminOrSuperuser, IsUserAnonModerAdmin
+from .permissions import AdminOrSuperuser, IsAdminOrSuper, IsUserAnonModerAdmin, ReadOnly
 from .serializers import (
     CategorySerializer,
     CommentSerializer,
@@ -109,16 +109,19 @@ class ListCreateDestroyViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
-    pass
+    permission_classes = (ReadOnly | IsAdminOrSuper,)
+    pagination_class = FourPerPagePagination
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     serializer_class = TitleSerializer
     pagination_class = FourPerPagePagination
-    permission_classes = (AdminOrAnon,)
+    permission_classes = (ReadOnly | IsAdminOrSuper,)
     filter_backends = (DjangoFilterBackend,)
-    # filterset_fields = ('category__slug', 'genre__slug', 'name', 'year')
     filterset_class = TitleFilter
 
     def get_serializer_class(self):
@@ -130,19 +133,11 @@ class TitleViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    pagination_class = FourPerPagePagination
-    permission_classes = (AdminOrAnon,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    pagination_class = FourPerPagePagination
-    permission_classes = (AdminOrAnon,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
 
 
 class ReViewSet(viewsets.ModelViewSet):

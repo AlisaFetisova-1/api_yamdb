@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
-from rest_framework.serializers import CharField, EmailField, ValidationError
-from rest_framework.validators import UniqueValidator
+from rest_framework.serializers import CharField
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
@@ -15,12 +14,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class MeSerializer(serializers.ModelSerializer):
-    username = CharField(
-        validators=[UniqueValidator(queryset=User.objects.all())]
-    )
-    email = EmailField(
-        validators=[UniqueValidator(queryset=User.objects.all())]
-    )
 
     class Meta:
         model = User
@@ -28,12 +21,6 @@ class MeSerializer(serializers.ModelSerializer):
             'username', 'email', 'first_name',
             'last_name', 'bio', 'role')
         read_only_fields = ('role',)
-
-    def validate_username(self, username):
-        if username == 'me':
-            raise ValidationError(
-                'Вы не можете использовать "me"!')
-        return username
 
 
 class GetTokenSerializer(serializers.ModelSerializer):
@@ -116,7 +103,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field='username',
         read_only=True,
         default=serializers.CurrentUserDefault(),
-        )
+    )
 
     class Meta:
         fields = ('id', 'text', 'author', 'score', 'pub_date')
