@@ -1,8 +1,11 @@
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
-from rest_framework.serializers import CharField, EmailField, ValidationError
-from rest_framework.validators import UniqueValidator
+from rest_framework.serializers import CharField, ValidationError
 from reviews.models import Category, Comment, Genre, Review, Title, User
+from reviews.models import (
+    ROLE_CHOICES, Category, Comment,
+    Genre, Review, Title, User,
+)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -23,12 +26,6 @@ class MeSerializer(serializers.ModelSerializer):
             'last_name', 'bio', 'role')
         read_only_fields = ('role',)
 
-    # def validate_username(self, username):
-    #     if username == 'me':
-    #         raise ValidationError(
-    #             'Вы не можете использовать "me"!')
-    #     return username
-
 
 class GetTokenSerializer(serializers.ModelSerializer):
     username = CharField(required=True)
@@ -43,10 +40,25 @@ class GetTokenSerializer(serializers.ModelSerializer):
 
 
 class SignUpSerializer(serializers.ModelSerializer):
+    username = serializers.SlugField(max_length=150)
+    email = serializers.EmailField(max_length=254)
 
     class Meta:
         model = User
         fields = ('email', 'username')
+
+    def validate_username(self, username):
+        if username.lower() == 'me':
+            raise ValidationError({"message": "недопустимый username"})
+        return username
+
+    def validate(self, data):
+        if User.objects.filter(username=data['username']).exists():
+            user = User.objects.get(username=data['username'])
+            if user.email == data['email']:
+                return data
+            raise ValidationError({"message": "Неверный email"})
+        return data
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -107,3 +119,14 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ("id", "text", "author", "pub_date")
         model = Comment
+
+class AdminSerializer(serializers.ModelSerializer):
+    
+    role = serializers.ChoiceField(choices=ROLE_CHOICES, required=False)
+
+    class Meta:
+        model = User
+        fields = (
+            'username', 'email', 'first_name',
+            'last_name', 'bio', 'role',
+        )
