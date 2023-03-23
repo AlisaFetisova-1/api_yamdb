@@ -1,7 +1,8 @@
+from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
-from rest_framework.serializers import CharField
-from reviews.models import Category, Comment, Genre, Review, Title, User
+from rest_framework.serializers import CharField, ValidationError
+from reviews.models import ROLE_CHOICES, Category, Comment, Genre, Review, Title, User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -36,10 +37,37 @@ class GetTokenSerializer(serializers.ModelSerializer):
 
 
 class SignUpSerializer(serializers.ModelSerializer):
+    username = serializers.SlugField(max_length=150)
+    email = serializers.EmailField(max_length=254)
 
     class Meta:
         model = User
         fields = ('email', 'username')
+
+    def validate_username(self, username):
+        if username.lower() == 'me':
+            raise ValidationError({"message": "недопустимый username"})
+        return username
+
+    def validate(self, data):
+        if User.objects.filter(username=data['username']).exists():
+            user = User.objects.get(username=data['username'])
+            if user.email == data['email']:
+                return data
+            raise ValidationError({"message": "Неверный email"})
+        return data
+
+
+class AdminSerializer(serializers.ModelSerializer):
+
+    role = serializers.ChoiceField(choices=ROLE_CHOICES, required=False)
+
+    class Meta:
+        model = User
+        fields = (
+            'username', 'email', 'first_name',
+            'last_name', 'bio', 'role',
+        )
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -48,11 +76,6 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         exclude = ('id',)
 
-    def validate_data(self, data):
-        if len(data['slug']) > 50:
-            raise serializers.ValidationError()
-        return data
-
 
 class GenreSerializer(serializers.ModelSerializer):
 
@@ -60,21 +83,21 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
         exclude = ('id',)
 
-    def validate_data(self, data):
-        if not data.is_valid():
-            raise serializers.ValidationError()
-        return data
-
 
 class TitleGETSerializer(serializers.ModelSerializer):
-    genre = GenreSerializer(many=True, read_only=True)
+    rating = serializers.SerializerMethodField()
     category = CategorySerializer(read_only=True)
-    rating = serializers.IntegerField(read_only=True)
+    genre = GenreSerializer(many=True, read_only=True)
 
     class Meta:
         model = Title
         fields = (
             'id', 'name', 'year', 'rating', 'description', 'genre', 'category')
+
+    def get_rating(self, obj):
+        rating = obj.reviews.aggregate(
+            Avg('score')).get('score__avg')
+        return round(rating, 2) if rating else rating
 
 
 class TitleSerializer(serializers.ModelSerializer):
