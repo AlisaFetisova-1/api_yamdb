@@ -2,7 +2,9 @@ from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.serializers import CharField, ValidationError
-from reviews.models import ROLE_CHOICES, Category, Comment, Genre, Review, Title, User
+from reviews.models import (ROLE_CHOICES, Category,
+                            Comment, Genre, Review,
+                            Title, User)
 
 
 class UserSerializer(serializers.ModelSerializer):
