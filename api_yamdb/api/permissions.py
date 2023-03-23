@@ -2,33 +2,6 @@ from django.contrib import admin
 from rest_framework import permissions
 
 
-class IsAdminOrReadOnly(permissions.BasePermission):
-    @property
-    def is_admin(self):
-        return (
-            self.role == admin or self.is_superuser or self.is_staff
-        )
-
-    def has_permission(self, request, view):
-        safe = request.method in permissions.SAFE_METHODS
-        if request.user.is_authenticated:
-            return safe or request.user.is_admin
-        return safe
-
-
-class AdminOrSuperuser(permissions.BasePermission):
-    @property
-    def is_admin(self):
-        return (
-            self.role == admin or self.is_superuser or self.is_staff
-        )
-
-    def has_permission(self, request, view):
-        if request.user.is_authenticated:
-            return request.user.is_admin
-        return False
-
-
 class IsAdminOrSuper(permissions.BasePermission):
     def has_permission(self, request, view):
         return (
