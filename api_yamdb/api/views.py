@@ -68,10 +68,10 @@ def sign_up(request):
     serializer = SignUpSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     try:
-        user = User.objects.get_or_create(
+        user, _ = User.objects.get_or_create(
             username=serializer.validated_data['username'],
             email=serializer.validated_data['email'],
-        )[0]
+        )
     except IntegrityError:
         return Response(
             'Имя пользователя или электронная почта занята.',
