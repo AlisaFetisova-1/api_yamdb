@@ -2,9 +2,8 @@ from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.serializers import CharField, ValidationError
-from reviews.models import (ROLE_CHOICES, Category,
-                            Comment, Genre, Review,
-                            Title, User)
+from reviews.models import Category, Comment, Genre, Review, Title
+from users.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -58,18 +57,6 @@ class SignUpSerializer(serializers.ModelSerializer):
                 return data
             raise ValidationError({"message": "Неверный email"})
         return data
-
-
-class AdminSerializer(serializers.ModelSerializer):
-
-    role = serializers.ChoiceField(choices=ROLE_CHOICES, required=False)
-
-    class Meta:
-        model = User
-        fields = (
-            'username', 'email', 'first_name',
-            'last_name', 'bio', 'role',
-        )
 
 
 class CategorySerializer(serializers.ModelSerializer):

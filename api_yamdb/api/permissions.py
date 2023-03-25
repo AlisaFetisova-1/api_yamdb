@@ -1,4 +1,3 @@
-from django.contrib import admin
 from rest_framework import permissions
 
 
@@ -28,10 +27,4 @@ class IsUserAnonModerAdmin(permissions.BasePermission):
             or request.user.is_admin
             or request.user.is_moderator
             or obj.author == request.user
-        )
-
-    @property
-    def is_admin(self):
-        return (
-            self.role == admin or self.is_superuser or self.is_staff
         )
