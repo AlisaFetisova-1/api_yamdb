@@ -1,26 +1,12 @@
-from datetime import datetime
-
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 
-from reviews.validators import validate_username
-
-TEXT_LENGTH = 15
-
-USER = 'user'
-ADMIN = 'admin'
-MODERATOR = 'moderator'
-
-ROLE_CHOICES = [
-    (USER, USER),
-    (ADMIN, ADMIN),
-    (MODERATOR, MODERATOR),
-]
+from .choices import UserRole
 
 
 class User(AbstractUser):
     email = models.EmailField(
+        'Email',
         max_length=254,
         unique=True,
         blank=False,
@@ -29,15 +15,15 @@ class User(AbstractUser):
     role = models.CharField(
         'Роль',
         max_length=20,
-        choices=ROLE_CHOICES,
-        default=USER,
+        choices=UserRole.choices,
+        default=UserRole.USER,
         blank=True
     )
     bio = models.TextField(
         'Биография',
         blank=True,
     )
-    
+
     confirmation_code = models.CharField(
         'Код подтверждения',
         max_length=255,
@@ -48,15 +34,15 @@ class User(AbstractUser):
 
     @property
     def is_user(self):
-        return self.role == USER
+        return self.role == UserRole.USER
 
     @property
     def is_moderator(self):
-        return self.role == MODERATOR
+        return self.role == UserRole.MODERATOR
 
     @property
     def is_admin(self):
-        return self.role == ADMIN
+        return self.role == UserRole.ADMIN
 
     class Meta:
         ordering = ('id',)
