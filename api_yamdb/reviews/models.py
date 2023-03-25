@@ -119,10 +119,6 @@ class Title(models.Model):
     name = models.CharField(max_length=256, db_index=True)
     year = models.IntegerField(
         validators=[
-            MinValueValidator(
-                0,
-                message='Введите год нашей эры'
-            ),
             MaxValueValidator(
                 int(datetime.now().year),
                 message='Введите год не больше текущего'
