@@ -6,30 +6,30 @@ from .choices import UserRole
 
 class User(AbstractUser):
     email = models.EmailField(
-        'Email',
         max_length=254,
         unique=True,
         blank=False,
-        null=False
+        null=False,
+        verbose_name='Email'
     )
     role = models.CharField(
-        'Роль',
         max_length=20,
         choices=UserRole.choices,
         default=UserRole.USER,
-        blank=True
+        blank=True,
+        verbose_name='Роль'
     )
     bio = models.TextField(
-        'Биография',
         blank=True,
+        verbose_name='Биография'
     )
 
     confirmation_code = models.CharField(
-        'Код подтверждения',
         max_length=255,
         null=True,
         blank=False,
-        default='XXXX'
+        default='XXXX',
+        verbose_name='Код подтверждения'
     )
 
     @property
