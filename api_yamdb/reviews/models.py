@@ -1,6 +1,4 @@
 from datetime import datetime
-
-from django.contrib.auth import get_user_model
 from django.core.validators import (MaxValueValidator,
                                     MinValueValidator,
                                     RegexValidator)
