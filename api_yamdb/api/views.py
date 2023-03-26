@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db import IntegrityError
@@ -29,7 +28,6 @@ from .serializers import (
     TitleSerializer,
     UserSerializer
 )
-
 
 
 class UserViewSet(ModelViewSet):
